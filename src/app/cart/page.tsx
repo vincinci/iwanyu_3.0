@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { FlutterwavePayment } from '@/components/ui/FlutterwavePayment';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { formatRWFSimple } from '@/lib/currency';
 
@@ -37,6 +38,12 @@ const initialCartItems = [
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState(initialCartItems);
+  const [showPayment, setShowPayment] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState({
+    email: 'customer@example.com',
+    phone: '+250788123456',
+    name: 'John Doe'
+  });
 
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -52,6 +59,21 @@ export default function CartPage() {
 
   const removeItem = (id: number) => {
     setCartItems(items => items.filter(item => item.id !== id));
+  };
+
+  const handlePaymentSuccess = (response: any) => {
+    console.log('Payment successful:', response);
+    // Handle successful payment
+    // - Clear cart
+    // - Redirect to success page
+    // - Send confirmation email
+    alert('Payment successful! Order confirmed.');
+    setCartItems([]);
+    setShowPayment(false);
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayment(false);
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -212,10 +234,34 @@ export default function CartPage() {
               </div>
 
               <Button
+                onClick={() => setShowPayment(true)}
                 className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white py-4 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
               >
                 Proceed to Checkout
               </Button>
+
+              {/* Flutterwave Payment Component */}
+              {showPayment && (
+                <div className="mt-6 p-6 border border-yellow-200 rounded-xl bg-yellow-50">
+                  <h3 className="text-lg font-semibold mb-4 text-center">Complete Your Payment</h3>
+                  <FlutterwavePayment
+                    amount={total}
+                    customerEmail={customerInfo.email}
+                    customerPhone={customerInfo.phone}
+                    customerName={customerInfo.name}
+                    orderId={`order_${Date.now()}`}
+                    onSuccess={handlePaymentSuccess}
+                    onClose={handlePaymentClose}
+                  />
+                  <Button
+                    onClick={() => setShowPayment(false)}
+                    variant="outline"
+                    className="w-full mt-4"
+                  >
+                    Cancel Payment
+                  </Button>
+                </div>
+              )}
 
               <div className="mt-6 text-center">
                 <Link
