@@ -7,37 +7,10 @@ import { Button } from '@/components/ui/button';
 import { FlutterwavePayment } from '@/components/ui/FlutterwavePayment';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { formatRWFSimple } from '@/lib/currency';
-
-// Sample cart data with RWF prices
-const initialCartItems = [
-  {
-    id: 1,
-    name: 'Premium Wireless Headphones',
-    price: 199990,
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    vendor: 'TechSound',
-    quantity: 1,
-  },
-  {
-    id: 2,
-    name: 'Organic Cotton T-Shirt',
-    price: 29990,
-    image: 'https://images.unsplash.com/photo-1544117519-31a4b719223d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    vendor: 'EcoWear',
-    quantity: 2,
-  },
-  {
-    id: 3,
-    name: 'Smart Home Speaker',
-    price: 149990,
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    vendor: 'SmartTech',
-    quantity: 1,
-  },
-];
+import { useCart } from '@/lib/cart';
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { items: cartItems, loading, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
   const [showPayment, setShowPayment] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     email: 'customer@example.com',
@@ -45,26 +18,22 @@ export default function CartPage() {
     name: 'John Doe'
   });
 
-  const updateQuantity = (id: number, newQuantity: number) => {
+  const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
-      removeItem(id);
+      await removeFromCart(itemId);
       return;
     }
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    await updateQuantity(itemId, newQuantity);
   };
 
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
+  const handleRemoveItem = async (itemId: string) => {
+    await removeFromCart(itemId);
   };
 
   const handlePaymentSuccess = (response: any) => {
     console.log('Payment successful:', response);
     alert('Payment successful! Order confirmed.');
-    setCartItems([]);
+    clearCart();
     setShowPayment(false);
   };
 
@@ -72,10 +41,23 @@ export default function CartPage() {
     setShowPayment(false);
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = getCartTotal();
   const shipping = subtotal > 100000 ? 0 : 9990;
   const tax = subtotal * 0.18;
   const total = subtotal + shipping + tax;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto px-3 py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-yellow-500 border-t-transparent mx-auto"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading your cart...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -117,54 +99,67 @@ export default function CartPage() {
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-4">
               <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
-                    <div className="w-16 h-16 relative rounded-lg overflow-hidden">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
+                {cartItems.map((item) => {
+                  const product = item.product;
+                  const productImage = product?.images?.[0] || '/placeholder-product.svg';
+                  const vendorName = product?.vendor?.businessName || 'Unknown Vendor';
+                  const productPrice = product?.price || 0;
+                  
+                  return (
+                    <div key={item.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
+                      <div className="w-16 h-16 relative rounded-lg overflow-hidden">
+                        <Image
+                          src={productImage}
+                          alt={product?.name || 'Product'}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium text-gray-900 truncate">{product?.name}</h3>
+                        <p className="text-xs text-gray-500">by {vendorName}</p>
+                        <p className="text-sm font-semibold text-gray-900">{formatRWFSimple(productPrice)}</p>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                          className="p-1 rounded-md hover:bg-gray-100"
+                          title="Decrease quantity"
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="px-2 py-1 bg-gray-100 rounded text-sm min-w-[40px] text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                          className="p-1 rounded-md hover:bg-gray-100"
+                          title="Increase quantity"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                      
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900 mb-1">
+                          {formatRWFSimple(productPrice * item.quantity)}
+                        </p>
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="text-red-500 hover:text-red-700 p-1 rounded-md"
+                          title="Remove item"
+                          aria-label="Remove item from cart"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-gray-900 truncate">{item.name}</h3>
-                      <p className="text-xs text-gray-500">by {item.vendor}</p>
-                      <p className="text-sm font-semibold text-gray-900">{formatRWFSimple(item.price)}</p>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1 rounded-md hover:bg-gray-100"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <span className="px-2 py-1 bg-gray-100 rounded text-sm min-w-[40px] text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 rounded-md hover:bg-gray-100"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                    
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900 mb-1">
-                        {formatRWFSimple(item.price * item.quantity)}
-                      </p>
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-500 hover:text-red-700 p-1 rounded-md"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

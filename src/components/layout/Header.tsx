@@ -8,11 +8,17 @@ import {
   MagnifyingGlassIcon,
   Bars3Icon,
   XMarkIcon,
-  HeartIcon
+  HeartIcon,
+  ChevronDownIcon
 } from "@heroicons/react/24/outline";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/lib/cart";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { user, isVendor, isAdmin, signOut, loading } = useAuth();
+  const { getCartCount } = useCart();
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -22,6 +28,8 @@ export function Header() {
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
+
+  const cartCount = getCartCount();
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
@@ -65,15 +73,103 @@ export function Header() {
             {/* Cart */}
             <Link href="/cart" className="p-2 text-gray-600 hover:text-gray-900 relative">
               <ShoppingCartIcon className="h-5 w-5" />
-              <span className="absolute -top-0.5 -right-0.5 bg-yellow-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                2
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-yellow-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             {/* User account */}
-            <Link href="/auth/login" className="p-2 text-gray-600 hover:text-gray-900">
-              <UserIcon className="h-5 w-5" />
-            </Link>
+            {loading ? (
+              <div className="p-2">
+                <div className="w-5 h-5 animate-pulse bg-gray-300 rounded-full"></div>
+              </div>
+            ) : user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center space-x-1 p-2 text-gray-600 hover:text-gray-900"
+                  title="User menu"
+                  aria-label="Open user menu"
+                >
+                  <UserIcon className="h-5 w-5" />
+                  <ChevronDownIcon className="h-3 w-3" />
+                </button>
+                
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                    <div className="p-2 border-b border-gray-200">
+                      <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                      <p className="text-xs text-gray-500">
+                        {isAdmin ? 'Admin' : isVendor ? 'Vendor' : 'Customer'}
+                      </p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        href="/profile"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/orders"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Orders
+                      </Link>
+                      <Link
+                        href="/wishlist"
+                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Wishlist
+                      </Link>
+                      {isVendor && (
+                        <>
+                          <hr className="my-1" />
+                          <Link
+                            href="/vendor/dashboard"
+                            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            Vendor Dashboard
+                          </Link>
+                        </>
+                      )}
+                      {isAdmin && (
+                        <>
+                          <hr className="my-1" />
+                          <Link
+                            href="/admin/dashboard"
+                            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            Admin Dashboard
+                          </Link>
+                        </>
+                      )}
+                      <hr className="my-1" />
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/auth/login" className="p-2 text-gray-600 hover:text-gray-900">
+                <UserIcon className="h-5 w-5" />
+              </Link>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -138,61 +234,88 @@ export function Header() {
 
           {/* Mobile user menu */}
           <div className="border-t border-gray-200 py-2">
-            <Link
-              href="/auth/login"
-              className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/auth/register"
-              className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Register
-            </Link>
-            <Link
-              href="/vendor/register"
-              className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Become a Vendor
-            </Link>
-          </div>
-          <div className="px-4 py-4 space-y-4">
-            {/* Mobile search */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-              />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400" aria-label="Search">
-                <MagnifyingGlassIcon className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Mobile navigation */}
-            <nav className="space-y-2">
-              {navigation.map((item) => (
+            {user ? (
+              <>
+                <div className="px-3 py-2 border-b border-gray-200">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                  <p className="text-xs text-gray-500">
+                    {isAdmin ? 'Admin' : isVendor ? 'Vendor' : 'Customer'}
+                  </p>
+                </div>
                 <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block py-2 text-base font-medium text-gray-700 hover:text-yellow-600"
+                  href="/profile"
+                  className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {item.name}
+                  Profile
                 </Link>
-              ))}
-              <Link
-                href="/vendor/register"
-                className="block py-2 text-base font-medium text-yellow-600 hover:text-yellow-700"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Become a Vendor
-              </Link>
-            </nav>
+                <Link
+                  href="/orders"
+                  className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Orders
+                </Link>
+                <Link
+                  href="/wishlist"
+                  className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Wishlist
+                </Link>
+                {isVendor && (
+                  <Link
+                    href="/vendor/dashboard"
+                    className="block px-3 py-2 text-sm font-medium text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Vendor Dashboard
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link
+                    href="/admin/dashboard"
+                    className="block px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    signOut();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Register
+                </Link>
+                <Link
+                  href="/vendor/register"
+                  className="block px-3 py-2 text-sm font-medium text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Become a Vendor
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -2,20 +2,74 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const router = useRouter();
+  const supabase = createClient();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login data:', formData);
+    setLoading(true);
+    setError('');
+
+    // Check if we're in test mode
+    const isTestMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (isTestMode) {
+      // Test mode: simple email/password check
+      if (formData.email && formData.password) {
+        // Create a mock user
+        const mockUser = {
+          id: '1',
+          email: formData.email,
+          user_metadata: {
+            role: formData.email.includes('vendor') ? 'VENDOR' : 'CUSTOMER',
+            name: formData.email.split('@')[0]
+          }
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('test-user', JSON.stringify(mockUser));
+        
+        // Reload the page to trigger auth context update
+        window.location.href = '/';
+        return;
+      } else {
+        setError('Please enter email and password');
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Real Supabase authentication
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        router.push('/');
+        router.refresh();
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,6 +87,12 @@ export default function LoginPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+          
           <div className="rounded-md shadow-sm -space-y-px">
             <div className="relative">
               <label htmlFor="email" className="sr-only">
@@ -100,9 +160,10 @@ export default function LoginPage() {
           <div>
             <Button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </div>
         </form>
