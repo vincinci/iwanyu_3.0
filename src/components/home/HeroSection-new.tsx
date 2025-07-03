@@ -5,8 +5,8 @@ import Link from "next/link";
 export function HeroSection() {
   return (
     <section className="relative h-40 overflow-hidden bg-gray-900">
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-800 to-yellow-900">
-        <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800">
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
       {/* Content */}
@@ -21,7 +21,7 @@ export function HeroSection() {
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-yellow-400 rounded-md hover:bg-yellow-500 transition-colors"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-700 transition-colors"
             >
               Browse Products
             </Link>

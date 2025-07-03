@@ -1,6 +1,4 @@
-import { supabase, supabaseAdmin } from './supabase'
 import { createClient as createBrowserClient } from '@/utils/supabase/client'
-import { createClient as createServerClient } from '@/utils/supabase/server'
 
 /**
  * Client-side database operations
@@ -21,8 +19,12 @@ export const clientDb = {
     const to = from + limit - 1
     
     const { data, error, count } = await supabase
-      .from('Product')
-      .select('*', { count: 'exact' })
+      .from('products')
+      .select(`
+        *,
+        vendor:vendors(businessName)
+      `, { count: 'exact' })
+      .eq('status', 'ACTIVE')
       .range(from, to)
       .order('createdAt', { ascending: false })
     
@@ -33,7 +35,7 @@ export const clientDb = {
   getProduct: async (id: string) => {
     const supabase = createBrowserClient()
     const { data, error } = await supabase
-      .from('Product')
+      .from('products')
       .select('*')
       .eq('id', id)
       .single()
@@ -48,7 +50,7 @@ export const clientDb = {
     if (!user) throw new Error('User not authenticated')
 
     const { data, error } = await supabase
-      .from('CartItem')
+      .from('cart_items')
       .insert({
         userId: user.id,
         productId,
@@ -56,89 +58,167 @@ export const clientDb = {
       })
     
     return { data, error }
-  }
-}
-
-/**
- * Server-side database operations
- * Use these in Server Components and API routes
- */
-export const serverDb = {
-  // Get current user (server-side)
-  getCurrentUser: async () => {
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    return user
   },
 
-  // Get products (server-side)
-  getProducts: async (page = 1, limit = 12) => {
-    const supabase = await createServerClient()
+  // Get categories
+  getCategories: async () => {
+    const supabase = createBrowserClient()
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('isActive', true)
+      .order('name', { ascending: true })
+    
+    return { data, error }
+  },
+
+  // Get single category
+  getCategory: async (id: string) => {
+    const supabase = createBrowserClient()
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    return { data, error }
+  },
+
+  // Get products by category
+  getProductsByCategory: async (categoryId: string, page = 1, limit = 12) => {
+    const supabase = createBrowserClient()
     const from = (page - 1) * limit
     const to = from + limit - 1
     
     const { data, error, count } = await supabase
-      .from('Product')
-      .select('*', { count: 'exact' })
+      .from('products')
+      .select(`
+        *,
+        vendor:vendors(businessName),
+        category:categories(name, slug)
+      `, { count: 'exact' })
+      .eq('categoryId', categoryId)
+      .eq('status', 'ACTIVE')
       .range(from, to)
       .order('createdAt', { ascending: false })
     
     return { data, error, count }
   },
 
-  // Get single product (server-side)
-  getProduct: async (id: string) => {
-    const supabase = await createServerClient()
+  // Get vendors
+  getVendors: async (page = 1, limit = 12) => {
+    const supabase = createBrowserClient()
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    
+    const { data, error, count } = await supabase
+      .from('vendors')
+      .select(`
+        *,
+        user:users(name, email, image)
+      `, { count: 'exact' })
+      .eq('status', 'APPROVED')
+      .range(from, to)
+      .order('createdAt', { ascending: false })
+    
+    return { data, error, count }
+  },
+
+  // Get single vendor
+  getVendor: async (id: string) => {
+    const supabase = createBrowserClient()
     const { data, error } = await supabase
-      .from('Product')
-      .select('*')
+      .from('vendors')
+      .select(`
+        *,
+        user:users(name, email, image)
+      `)
       .eq('id', id)
       .single()
     
     return { data, error }
-  }
-}
-
-/**
- * Server-side database operations
- * Use these in API routes and server-side code only
- */
-export const adminDb = {
-  // Create user (admin operation)
-  createUser: async (userData: any) => {
-    const { data, error } = await supabaseAdmin
-      .from('User')
-      .insert(userData)
-    
-    return { data, error }
   },
 
-  // Get all orders (admin operation)
-  getAllOrders: async () => {
-    const { data, error } = await supabaseAdmin
-      .from('Order')
-      .select('*')
+  // Get featured products (latest or most popular)
+  getFeaturedProducts: async (limit = 8) => {
+    const supabase = createBrowserClient()
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        vendor:vendors(businessName),
+        category:categories(name, slug)
+      `)
+      .eq('status', 'ACTIVE')
+      .limit(limit)
       .order('createdAt', { ascending: false })
     
     return { data, error }
   },
 
-  // Update product status (vendor/admin operation)
-  updateProductStatus: async (productId: string, status: string) => {
-    const { data, error } = await supabaseAdmin
-      .from('Product')
-      .update({ status })
-      .eq('id', productId)
+  // Search products
+  searchProducts: async (query: string, page = 1, limit = 12) => {
+    const supabase = createBrowserClient()
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    
+    const { data, error, count } = await supabase
+      .from('products')
+      .select(`
+        *,
+        vendor:vendors(businessName),
+        category:categories(name, slug)
+      `, { count: 'exact' })
+      .eq('status', 'ACTIVE')
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+      .range(from, to)
+      .order('createdAt', { ascending: false })
+    
+    return { data, error, count }
+  },
+
+  // Get cart items
+  getCartItems: async () => {
+    const supabase = createBrowserClient()
+    const user = await clientDb.getCurrentUser()
+    if (!user) return { data: null, error: new Error('User not authenticated') }
+
+    const { data, error } = await supabase
+      .from('cart_items')
+      .select(`
+        *,
+        product:products(
+          id,
+          name,
+          price,
+          images,
+          vendor:vendors(businessName)
+        )
+      `)
+      .eq('userId', user.id)
+      .order('createdAt', { ascending: false })
     
     return { data, error }
   },
 
-  // Delete user (admin operation)
-  deleteUser: async (userId: string) => {
-    const { data, error } = await supabaseAdmin
-      .from('User')
+  // Update cart item quantity
+  updateCartItem: async (itemId: string, quantity: number) => {
+    const supabase = createBrowserClient()
+    const { data, error } = await supabase
+      .from('cart_items')
+      .update({ quantity })
+      .eq('id', itemId)
+    
+    return { data, error }
+  },
+
+  // Remove from cart
+  removeFromCart: async (itemId: string) => {
+    const supabase = createBrowserClient()
+    const { data, error } = await supabase
+      .from('cart_items')
       .delete()
-      .eq('id', userId)
+      .eq('id', itemId)
     
     return { data, error }
   }
@@ -198,7 +278,7 @@ export const realtime = {
     return supabase
       .channel('products')
       .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'Product' }, 
+        { event: '*', schema: 'public', table: 'products' }, 
         callback
       )
       .subscribe()
@@ -213,7 +293,7 @@ export const realtime = {
         { 
           event: '*', 
           schema: 'public', 
-          table: 'Order',
+          table: 'orders',
           filter: `userId=eq.${userId}`
         }, 
         callback

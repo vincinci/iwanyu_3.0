@@ -110,7 +110,7 @@ export default function CartPage() {
             </Link>
             Shopping Cart
           </h1>
-          <span className="text-sm text-yellow-600 font-medium">{cartItems.length} items</span>
+          <span className="text-sm text-gray-600">{cartItems.length} items</span>
         </div>
 
         <div className="space-y-4">
@@ -192,21 +192,20 @@ export default function CartPage() {
                 <span className="font-medium">{formatRWFSimple(tax)}</span>
               </div>
               {subtotal < 100000 && (
-                <div className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 p-2 rounded text-center">
+                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded text-center">
                   Add {formatRWFSimple(100000 - subtotal)} more for free shipping
                 </div>
               )}
               <hr className="border-gray-200" />
               <div className="flex justify-between text-base font-semibold pt-2">
                 <span>Total</span>
-                <span className="text-yellow-600">{formatRWFSimple(total)}</span>
+                <span className="text-gray-900">{formatRWFSimple(total)}</span>
               </div>
             </div>
 
             <Button
               onClick={() => setShowPayment(true)}
-              variant="primary"
-              className="w-full py-2 text-sm font-medium rounded-md"
+              className="w-full bg-gray-800 hover:bg-gray-900 text-white py-2 text-sm font-medium rounded-md"
             >
               Proceed to Checkout
             </Button>

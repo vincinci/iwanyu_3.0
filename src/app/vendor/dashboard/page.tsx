@@ -61,24 +61,24 @@ export default function VendorDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-3 py-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Vendor Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back, TechSound!</p>
+        <div className="mb-4">
+          <h1 className="text-lg font-semibold text-gray-900">Vendor Dashboard</h1>
+          <p className="text-sm text-gray-600">Welcome back, TechSound!</p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
+        <div className="border-b border-gray-200 mb-4">
+          <nav className="flex space-x-4 overflow-x-auto">
             {['overview', 'products', 'orders', 'analytics'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
+                className={`py-2 px-3 border-b-2 font-medium text-sm capitalize whitespace-nowrap ${
                   activeTab === tab
                     ? 'border-yellow-500 text-yellow-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
                 {tab}
@@ -89,19 +89,19 @@ export default function VendorDashboardPage() {
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
-          <div className="space-y-8">
+          <div className="space-y-4">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-3">
               {stats.map((stat) => (
-                <div key={stat.label} className="bg-white rounded-lg shadow-sm p-6">
+                <div key={stat.label} className="bg-white rounded-lg shadow-sm p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">{stat.label}</p>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                      <p className="text-sm text-green-600">{stat.change}</p>
+                      <p className="text-xs text-gray-600">{stat.label}</p>
+                      <p className="text-base font-semibold text-gray-900">{stat.value}</p>
+                      <p className="text-xs text-green-600">{stat.change}</p>
                     </div>
-                    <div className="p-3 bg-yellow-100 rounded-lg">
-                      <stat.icon className="h-6 w-6 text-yellow-600" />
+                    <div className="p-2 bg-gray-100 rounded-lg">
+                      <stat.icon className="h-4 w-4 text-gray-600" />
                     </div>
                   </div>
                 </div>
@@ -110,19 +110,19 @@ export default function VendorDashboardPage() {
 
             {/* Recent Orders */}
             <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+              <div className="p-3 border-b border-gray-200">
+                <h2 className="text-base font-medium text-gray-900">Recent Orders</h2>
               </div>
-              <div className="p-6">
-                <div className="space-y-4">
+              <div className="p-3">
+                <div className="space-y-3">
                   {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                      <div>
-                        <p className="font-medium text-gray-900">{order.id}</p>
-                        <p className="text-sm text-gray-500">{order.customer} • {order.product}</p>
+                    <div key={order.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{order.id}</p>
+                        <p className="text-xs text-gray-500 truncate">{order.customer} • {order.product}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">{order.amount}</p>
+                      <div className="text-right ml-2">
+                        <p className="text-sm font-medium text-gray-900">{order.amount}</p>
                         <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
                           order.status === 'Completed' ? 'bg-green-100 text-green-800' :
                           order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' :
@@ -141,98 +141,55 @@ export default function VendorDashboardPage() {
 
         {/* Products Tab */}
         {activeTab === 'products' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Your Products</h2>
-              <Button className="bg-yellow-500 hover:bg-yellow-600 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Product
+              <h2 className="text-base font-semibold text-gray-900">Your Products</h2>
+              <Button size="sm" variant="primary" className="text-white">
+                <Plus className="w-3 h-3 mr-1" />
+                Add
               </Button>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Product
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Price
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Stock
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {products.map((product) => (
-                      <tr key={product.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="w-12 h-12 relative rounded-lg overflow-hidden mr-4">
-                              <Image
-                                src={product.image}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {product.price}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {product.stock}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                            product.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {product.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              className="text-yellow-600 hover:text-yellow-900"
-                              title="View product"
-                              aria-label="View product"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="text-blue-600 hover:text-blue-900"
-                              title="Edit product"
-                              aria-label="Edit product"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="text-red-600 hover:text-red-900"
-                              title="Delete product"
-                              aria-label="Delete product"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            <div className="space-y-3">
+              {products.map((product) => (
+                <div key={product.id} className="bg-white rounded-lg shadow-sm p-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 relative rounded-lg overflow-hidden">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-sm font-semibold text-gray-900">{product.price}</span>
+                        <span className="text-xs text-gray-500">Stock: {product.stock}</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                          product.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {product.status}
+                        </span>
+                        <div className="flex space-x-1">
+                          <button className="p-1 text-gray-400 hover:text-gray-600" title="View">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-1 text-gray-400 hover:text-gray-600" title="Edit">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button className="p-1 text-gray-400 hover:text-red-600" title="Delete">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

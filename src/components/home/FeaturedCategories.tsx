@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { 
   DevicePhoneMobileIcon,
@@ -9,122 +12,116 @@ import {
   WrenchScrewdriverIcon,
   MusicalNoteIcon
 } from "@heroicons/react/24/outline";
+import { clientDb } from '@/lib/database';
 
-const categories = [
-  {
-    id: 1,
-    name: "Electronics",
-    description: "Latest gadgets and tech",
-    icon: DevicePhoneMobileIcon,
-    itemCount: "15,234",
-    href: "/categories/electronics",
-    color: "bg-blue-500",
-  },
-  {
-    id: 2,
-    name: "Computers",
-    description: "Laptops, desktops & more",
-    icon: ComputerDesktopIcon,
-    itemCount: "8,567",
-    href: "/categories/computers",
-    color: "bg-indigo-500",
-  },
-  {
-    id: 3,
-    name: "Fashion",
-    description: "Clothing & accessories",
-    icon: ShoppingBagIcon,
-    itemCount: "25,891",
-    href: "/categories/fashion",
-    color: "bg-pink-500",
-  },
-  {
-    id: 4,
-    name: "Home & Garden",
-    description: "Furniture & decor",
-    icon: HomeIcon,
-    itemCount: "12,456",
-    href: "/categories/home-garden",
-    color: "bg-green-500",
-  },
-  {
-    id: 5,
-    name: "Health & Beauty",
-    description: "Wellness products",
-    icon: HeartIcon,
-    itemCount: "9,123",
-    href: "/categories/health-beauty",
-    color: "bg-red-500",
-  },
-  {
-    id: 6,
-    name: "Books",
-    description: "Physical & digital books",
-    icon: BookOpenIcon,
-    itemCount: "18,765",
-    href: "/categories/books",
-    color: "bg-amber-500",
-  },
-  {
-    id: 7,
-    name: "Tools",
-    description: "Hardware & equipment",
-    icon: WrenchScrewdriverIcon,
-    itemCount: "6,789",
-    href: "/categories/tools",
-    color: "bg-gray-500",
-  },
-  {
-    id: 8,
-    name: "Music",
-    description: "Instruments & audio",
-    icon: MusicalNoteIcon,
-    itemCount: "4,321",
-    href: "/categories/music",
-    color: "bg-purple-500",
-  },
-];
+// Category type from database
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  image: string | null;
+  isActive: boolean;
+}
+
+// Icon mapping for categories
+const iconMapping: Record<string, any> = {
+  electronics: DevicePhoneMobileIcon,
+  computers: ComputerDesktopIcon,
+  fashion: ShoppingBagIcon,
+  'home-garden': HomeIcon,
+  'health-beauty': HeartIcon,
+  books: BookOpenIcon,
+  tools: WrenchScrewdriverIcon,
+  music: MusicalNoteIcon,
+};
+
+// Color mapping for categories
+const colorMapping: Record<string, string> = {
+  electronics: "bg-blue-500",
+  computers: "bg-indigo-500", 
+  fashion: "bg-pink-500",
+  'home-garden': "bg-green-500",
+  'health-beauty': "bg-red-500",
+  books: "bg-amber-500",
+  tools: "bg-gray-500",
+  music: "bg-purple-500",
+};
 
 export function FeaturedCategories() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const result = await clientDb.getCategories();
+        if (result.error) {
+          console.error('Failed to fetch categories:', result.error);
+        } else {
+          // Limit to first 8 categories for featured display
+          setCategories(result.data?.slice(0, 8) || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-3">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-400 border-t-transparent mx-auto"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading categories...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+  
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-4 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-3">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 font-display">
+        <div className="text-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">
             Shop by Category
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore our wide range of product categories from trusted vendors worldwide
+          <p className="text-xs text-gray-600">
+            Browse products by category
           </p>
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
           {categories.map((category) => {
-            const IconComponent = category.icon;
+            const IconComponent = iconMapping[category.slug] || ShoppingBagIcon;
+            const color = colorMapping[category.slug] || "bg-gray-500";
             return (
               <Link
                 key={category.id}
-                href={category.href}
-                className="group bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                href={`/categories/${category.slug}`}
+                className="group bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-all duration-300"
               >
                 <div className="text-center">
                   {/* Icon */}
-                  <div className={`mx-auto w-16 h-16 ${category.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="h-8 w-8 text-white" />
+                  <div className={`mx-auto w-10 h-10 ${color} rounded-lg flex items-center justify-center mb-2 group-hover:scale-105 transition-transform duration-300`}>
+                    <IconComponent className="h-5 w-5 text-white" />
                   </div>
                   
                   {/* Category Info */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                  <h3 className="text-sm font-medium text-gray-900 mb-1 group-hover:text-gray-700 transition-colors">
                     {category.name}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-3">
-                    {category.description}
+                  <p className="text-xs text-gray-500">
+                    Browse items
                   </p>
-                  <div className="text-xs text-primary-600 font-medium">
-                    {category.itemCount} items
-                  </div>
                 </div>
               </Link>
             );
@@ -132,12 +129,12 @@ export function FeaturedCategories() {
         </div>
 
         {/* View All Categories Link */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-4">
           <Link
             href="/categories"
-            className="inline-flex items-center px-8 py-3 text-primary-600 border-2 border-primary-600 rounded-lg font-semibold hover:bg-primary-600 hover:text-white transition-all duration-300"
+            className="text-xs text-yellow-600 hover:text-yellow-700 font-medium"
           >
-            View All Categories
+            View All Categories →
           </Link>
         </div>
       </div>

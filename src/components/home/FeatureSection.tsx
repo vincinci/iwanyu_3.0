@@ -48,37 +48,37 @@ const features = [
 
 export function FeatureSection() {
   return (
-    <section className="py-16 bg-gradient-to-br from-primary-50 to-primary-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-6 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 font-display">
+        <div className="text-center mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
             Why Choose Iwanyu?
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">                We&apos;re committed to providing the best multivendor marketplace experience
-            with features designed for both buyers and sellers
+          <p className="text-sm text-gray-600 max-w-2xl mx-auto">
+            Features designed for buyers and sellers
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {features.map((feature) => {
             const IconComponent = feature.icon;
             return (
               <div
                 key={feature.id}
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all duration-300 text-center group"
+                className="bg-white rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow text-center"
               >
                 {/* Icon */}
-                <div className="mx-auto w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary-600 transition-colors duration-300">
-                  <IconComponent className="h-8 w-8 text-white" />
+                <div className="mx-auto w-8 h-8 sm:w-10 sm:h-10 bg-yellow-500 rounded-lg flex items-center justify-center mb-2">
+                  <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 
                 {/* Feature Info */}
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 className="text-xs sm:text-sm font-medium text-gray-900 mb-1">
                   {feature.name}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-xs text-gray-500 leading-tight hidden sm:block">
                   {feature.description}
                 </p>
               </div>
@@ -87,43 +87,36 @@ export function FeatureSection() {
         </div>
 
         {/* CTA Section */}
-        <div className="mt-16 bg-white rounded-2xl p-8 lg:p-12 shadow-xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 font-display">
-                Ready to Start Selling?
-              </h3>
-              <p className="text-lg text-gray-600 mb-6">
-                Join thousands of successful vendors on our platform. No monthly fees, 
-                easy setup, and access to millions of potential customers.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button className="px-8 py-3 bg-primary-500 text-white rounded-lg font-semibold hover:bg-primary-600 transition-colors btn-hover">
-                  Become a Vendor
-                </button>
-                <button className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:border-primary-500 hover:text-primary-600 transition-colors">
-                  Learn More
-                </button>
-              </div>
+        <div className="mt-6 bg-white rounded-lg p-4 sm:p-6 shadow-sm">
+          <div className="text-center">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+              Ready to Start Selling?
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Join thousands of vendors. No setup fees.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <button className="px-4 py-2 bg-yellow-500 text-white rounded-md text-sm font-medium hover:bg-yellow-600 transition-colors">
+                Become a Vendor
+              </button>
+              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:border-gray-400 transition-colors">
+                Learn More
+              </button>
             </div>
-            <div className="text-center lg:text-right">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <div className="text-3xl font-bold text-primary-600">0%</div>
-                  <div className="text-sm text-gray-500">Setup Fee</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary-600">5%</div>
-                  <div className="text-sm text-gray-500">Commission</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary-600">24/7</div>
-                  <div className="text-sm text-gray-500">Support</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary-600">∞</div>
-                  <div className="text-sm text-gray-500">Products</div>
-                </div>
+            
+            {/* Stats */}
+            <div className="flex justify-center gap-6 mt-4 text-center">
+              <div>
+                <div className="text-lg font-bold text-yellow-600">0%</div>
+                <div className="text-xs text-gray-500">Setup Fee</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold text-yellow-600">5%</div>
+                <div className="text-xs text-gray-500">Commission</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold text-yellow-600">24/7</div>
+                <div className="text-xs text-gray-500">Support</div>
               </div>
             </div>
           </div>

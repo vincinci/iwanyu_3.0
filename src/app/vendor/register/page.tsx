@@ -40,66 +40,66 @@ export default function VendorRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="bg-yellow-500 px-8 py-6">
-            <h1 className="text-3xl font-bold text-white">Become a Vendor</h1>
-            <p className="text-yellow-100 mt-2">Join Iwanyu and start selling your products to thousands of customers</p>
+          <div className="bg-gray-800 px-4 py-4">
+            <h1 className="text-lg sm:text-xl font-semibold text-white">Become a Vendor</h1>
+            <p className="text-gray-300 mt-1 text-sm">Join Iwanyu and start selling</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <form onSubmit={handleSubmit} className="p-4 space-y-6">
             {/* Business Information */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                <Building className="w-5 h-5 mr-2 text-yellow-600" />
+              <h2 className="text-base font-medium text-gray-900 mb-4 flex items-center">
+                <Building className="w-4 h-4 mr-2 text-gray-600" />
                 Business Information
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                  <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
                     Business Name *
                   </label>
                   <input
                     type="text"
                     id="businessName"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500 text-sm"
                     value={formData.businessName}
                     onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                     placeholder="Enter your business name"
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                     Business Description *
                   </label>
                   <textarea
                     id="description"
                     required
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500 text-sm"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Describe your business and products"
+                    placeholder="Describe your business"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="businessType" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="businessType" className="block text-sm font-medium text-gray-700 mb-1">
                     Business Type *
                   </label>
                   <select
                     id="businessType"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500 text-sm"
                     value={formData.businessType}
                     onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
                   >
-                    <option value="">Select business type</option>
+                    <option value="">Select type</option>
                     <option value="individual">Individual</option>
                     <option value="llc">LLC</option>
                     <option value="corporation">Corporation</option>
@@ -108,14 +108,14 @@ export default function VendorRegisterPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="taxId" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="taxId" className="block text-sm font-medium text-gray-700 mb-1">
                     Tax ID / EIN *
                   </label>
                   <input
                     type="text"
                     id="taxId"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500 text-sm"
                     value={formData.taxId}
                     onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
                     placeholder="XX-XXXXXXX"

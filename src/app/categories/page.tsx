@@ -1,101 +1,33 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBagIcon, TagIcon } from '@heroicons/react/24/outline';
+import { clientDb } from '@/lib/database';
 
-const categories = [
-  {
-    id: 1,
-    name: 'Electronics',
-    description: 'Smartphones, laptops, headphones, and tech accessories',
-    productCount: 2456,
-    image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/electronics',
-    trending: true,
-  },
-  {
-    id: 2,
-    name: 'Fashion & Clothing',
-    description: 'Trendy clothing, shoes, and accessories for all ages',
-    productCount: 3421,
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/fashion',
-    trending: true,
-  },
-  {
-    id: 3,
-    name: 'Home & Garden',
-    description: 'Furniture, decor, gardening tools, and home essentials',
-    productCount: 1876,
-    image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/home-garden',
-    trending: false,
-  },
-  {
-    id: 4,
-    name: 'Health & Beauty',
-    description: 'Skincare, makeup, wellness products, and health supplements',
-    productCount: 1543,
-    image: 'https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/health-beauty',
-    trending: true,
-  },
-  {
-    id: 5,
-    name: 'Sports & Fitness',
-    description: 'Exercise equipment, activewear, and sports accessories',
-    productCount: 987,
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/sports-fitness',
-    trending: false,
-  },
-  {
-    id: 6,
-    name: 'Books & Education',
-    description: 'Books, educational materials, and learning resources',
-    productCount: 2134,
-    image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/books-education',
-    trending: false,
-  },
-  {
-    id: 7,
-    name: 'Automotive',
-    description: 'Car accessories, tools, and automotive equipment',
-    productCount: 678,
-    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/automotive',
-    trending: false,
-  },
-  {
-    id: 8,
-    name: 'Food & Beverages',
-    description: 'Gourmet foods, beverages, and culinary essentials',
-    productCount: 1245,
-    image: 'https://images.unsplash.com/photo-1563379091339-03246963d4e6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    href: '/categories/food-beverages',
-    trending: true,
-  },
-];
+// Category type from database
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  image: string | null;
+  isActive: boolean;
+}
 
-function CategoryCard({ category }: { category: typeof categories[0] }) {
+function CategoryCard({ category }: { category: Category }) {
   return (
-    <Link href={category.href}>
+    <Link href={`/categories/${category.slug}`}>
       <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 group overflow-hidden border border-gray-100">
         {/* Category Image */}
         <div className="relative h-48 overflow-hidden">
           <Image
-            src={category.image}
+            src={category.image || '/placeholder-product.svg'}
             alt={category.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          {category.trending && (
-            <div className="absolute top-3 left-3">
-              <span className="px-2 py-1 text-xs font-bold text-white bg-yellow-500 rounded-full">
-                Trending
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Category Info */}
@@ -108,13 +40,13 @@ function CategoryCard({ category }: { category: typeof categories[0] }) {
           </div>
           
           <p className="text-gray-600 mb-4 text-sm sm:text-base leading-relaxed">
-            {category.description}
+            {category.description || 'Explore our collection in this category'}
           </p>
           
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <ShoppingBagIcon className="h-4 w-4" />
-              <span>{category.productCount.toLocaleString()} products</span>
+              <span>Browse products</span>
             </div>
             <span className="text-yellow-600 font-semibold text-sm group-hover:underline">
               Browse →
@@ -127,6 +59,59 @@ function CategoryCard({ category }: { category: typeof categories[0] }) {
 }
 
 export default function CategoriesPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const result = await clientDb.getCategories();
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+        setCategories(result.data || []);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setError('Failed to load categories');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-yellow-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-yellow-500 border-t-transparent mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading categories...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-yellow-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="text-center">
+            <p className="text-red-600">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-yellow-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">

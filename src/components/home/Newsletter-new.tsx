@@ -44,12 +44,12 @@ export function Newsletter() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email"
                   required
-                  className="flex-1 px-3 py-2 text-sm rounded-md border-0 text-gray-900 placeholder-gray-500 focus:ring-1 focus:ring-yellow-400"
+                  className="flex-1 px-3 py-2 text-sm rounded-md border-0 text-gray-900 placeholder-gray-500 focus:ring-1 focus:ring-white"
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-yellow-400 text-gray-900 rounded-md font-medium hover:bg-yellow-500 transition-colors disabled:opacity-50 text-sm"
+                  className="px-4 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 text-sm"
                 >
                   {isSubmitting ? "..." : "Join"}
                 </button>

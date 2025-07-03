@@ -1,45 +1,82 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { clientDb } from './database';
 
-// Simple cart state management - in a real app, you'd use Redux/Zustand/Context
-let cartItems: any[] = [];
-const cartSubscribers: (() => void)[] = [];
-
+// Cart hook for managing cart state
 export const useCart = () => {
-  const [, forceUpdate] = useState({});
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const addToCart = (product: any, quantity: number = 1) => {
-    const existingItem = cartItems.find(item => item.id === product.id);
-    
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
-      cartItems.push({ ...product, quantity });
+  // Load cart items on mount
+  useEffect(() => {
+    loadCartItems();
+  }, []);
+
+  const loadCartItems = async () => {
+    try {
+      setLoading(true);
+      const { data } = await clientDb.getCartItems();
+      setCartItems(data || []);
+    } catch (error) {
+      console.error('Failed to load cart items:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    // Notify all subscribers
-    cartSubscribers.forEach(callback => callback());
-    forceUpdate({});
   };
 
-  const removeFromCart = (productId: number) => {
-    cartItems = cartItems.filter(item => item.id !== productId);
-    cartSubscribers.forEach(callback => callback());
-    forceUpdate({});
+  const addToCart = async (productId: string, quantity: number = 1) => {
+    try {
+      setLoading(true);
+      
+      // Check if item already exists in cart
+      const existingItem = cartItems.find(item => item.productId === productId);
+      
+      if (existingItem) {
+        // Update quantity
+        await clientDb.updateCartItem(existingItem.id, existingItem.quantity + quantity);
+      } else {
+        // Add new item
+        await clientDb.addToCart(productId, quantity);
+      }
+      
+      // Reload cart items
+      await loadCartItems();
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateQuantity = (productId: number, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
+  const removeFromCart = async (itemId: string) => {
+    try {
+      setLoading(true);
+      await clientDb.removeFromCart(itemId);
+      await loadCartItems();
+    } catch (error) {
+      console.error('Failed to remove from cart:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    const item = cartItems.find(item => item.id === productId);
-    if (item) {
-      item.quantity = quantity;
-      cartSubscribers.forEach(callback => callback());
-      forceUpdate({});
+  };
+
+  const updateQuantity = async (itemId: string, quantity: number) => {
+    try {
+      setLoading(true);
+      
+      if (quantity <= 0) {
+        await removeFromCart(itemId);
+        return;
+      }
+      
+      await clientDb.updateCartItem(itemId, quantity);
+      await loadCartItems();
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,15 +85,34 @@ export const useCart = () => {
   };
 
   const getCartTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce((total, item) => {
+      const price = item.product?.price || 0;
+      return total + (price * item.quantity);
+    }, 0);
+  };
+
+  const clearCart = async () => {
+    try {
+      setLoading(true);
+      // Remove all items one by one (could be optimized with a bulk delete endpoint)
+      await Promise.all(cartItems.map(item => clientDb.removeFromCart(item.id)));
+      setCartItems([]);
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
     items: cartItems,
+    loading,
     addToCart,
     removeFromCart,
     updateQuantity,
     getCartCount,
     getCartTotal,
+    clearCart,
+    refresh: loadCartItems,
   };
 };
