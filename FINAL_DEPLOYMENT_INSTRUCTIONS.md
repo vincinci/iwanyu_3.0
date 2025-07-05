@@ -178,6 +178,37 @@ Error: npm install failed with peer dependency conflicts
    - Click "Redeploy" on latest deployment
    - Or push a new commit to trigger deployment
 
+### 🔧 **If APIs Still Return 500 Errors:**
+
+**The backend is running but APIs fail with 500 errors:**
+
+1. **Check Database Connection**:
+   ```bash
+   # Test database connectivity
+   curl https://iwanyu-3-0.onrender.com/api/db-test
+   ```
+
+2. **Database Tables Missing**:
+   - Issue: Database tables haven't been created
+   - Solution: Render should run `prisma db push` during build
+   - Check Render build logs for database setup
+
+3. **Manual Database Setup** (if needed):
+   - Go to Render dashboard
+   - Open your service shell/console
+   - Run: `npm run db:setup`
+
+4. **Check Environment Variables**:
+   - Verify `DATABASE_URL` is correctly set
+   - Ensure database server is accessible from Render
+   - Check if DATABASE_URL format is correct
+
+5. **Seed Database with Sample Data**:
+   ```bash
+   # If you have access to Render shell
+   npm run db:seed
+   ```
+
 ---
 
 **Your Iwanyu platform is ready to go live! 🎉**

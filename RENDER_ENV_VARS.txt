@@ -3,7 +3,8 @@
 
 NODE_ENV=production
 PORT=10000
-DATABASE_URL=postgresql://postgres:davy$100@db.januuygbpxenuhhlsjph.supabase.co:5432/postgres
+# Updated DATABASE_URL with proper SSL configuration
+DATABASE_URL=postgresql://postgres:davy$100@db.januuygbpxenuhhlsjph.supabase.co:5432/postgres?sslmode=require
 
 # NextAuth.js
 NEXTAUTH_SECRET=your_super_secret_key_here_make_it_long_and_random_123456789

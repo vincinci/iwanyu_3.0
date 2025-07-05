@@ -6,8 +6,8 @@ NEXT_PUBLIC_API_URL=https://iwanyu-3-0.onrender.com
 NEXTAUTH_URL=https://iwanyu-3-0.vercel.app
 NEXTAUTH_SECRET=your_super_secret_key_here_make_it_long_and_random_123456789
 
-# Database (same as backend)
-DATABASE_URL=postgresql://postgres:davy$100@db.januuygbpxenuhhlsjph.supabase.co:5432/postgres
+# Database (same as backend with SSL)
+DATABASE_URL=postgresql://postgres:davy$100@db.januuygbpxenuhhlsjph.supabase.co:5432/postgres?sslmode=require
 
 # Flutterwave Payment Integration
 NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY=FLWPUBK-80beae9a1e1463654d41a8e4d00515dd-X
