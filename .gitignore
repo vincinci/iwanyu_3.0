@@ -10,15 +10,32 @@
 !.yarn/releases
 !.yarn/versions
 
+# frontend dependencies
+frontend/node_modules
+frontend/.pnp
+frontend/.yarn/*
+
+# backend dependencies  
+backend/node_modules
+backend/.pnp
+backend/.yarn/*
+
 # testing
 /coverage
+frontend/coverage
+backend/coverage
 
 # next.js
 /.next/
 /out/
+frontend/.next/
+frontend/out/
 
 # production
 /build
+frontend/build
+backend/build
+backend/dist
 
 # misc
 .DS_Store
@@ -32,6 +49,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+frontend/.env*
+backend/.env*
 
 # vercel
 .vercel
@@ -39,5 +58,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+frontend/next-env.d.ts
 
+# generated files
 /src/generated/prisma
+frontend/src/generated/prisma
+backend/src/generated/prisma
+
+# logs
+*.log
+frontend/*.log
+backend/*.log
