@@ -38,6 +38,42 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Database connection test
+app.get('/api/db-test', async (req, res) => {
+  try {
+    // Test database connection
+    await prisma.$connect();
+    
+    // Test if tables exist by trying to count records
+    const tests = await Promise.allSettled([
+      prisma.category.count(),
+      prisma.product.count(),
+      prisma.vendor.count(),
+      prisma.user.count()
+    ]);
+    
+    const results = {
+      database: 'Connected',
+      tables: {
+        categories: tests[0].status === 'fulfilled' ? `${tests[0].value} records` : 'Table missing or error',
+        products: tests[1].status === 'fulfilled' ? `${tests[1].value} records` : 'Table missing or error',
+        vendors: tests[2].status === 'fulfilled' ? `${tests[2].value} records` : 'Table missing or error',
+        users: tests[3].status === 'fulfilled' ? `${tests[3].value} records` : 'Table missing or error'
+      }
+    };
+    
+    res.json(results);
+  } catch (error) {
+    console.error('Database test error:', error);
+    res.status(500).json({ 
+      error: 'Database connection failed',
+      details: error.message 
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
 // Products API
 app.get('/api/products', async (req, res) => {
   try {
@@ -76,8 +112,11 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// Featured Products API
 app.get('/api/products/featured', async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 6;
+    
     const products = await prisma.product.findMany({
       where: { status: 'ACTIVE' },
       include: {
@@ -86,18 +125,30 @@ app.get('/api/products/featured', async (req, res) => {
         }
       },
       orderBy: { createdAt: 'desc' },
-      take: 6
+      take: limit
     });
-    res.json(products);
+    
+    res.json(products || []);
   } catch (error) {
     console.error('Featured products error:', error);
-    res.status(500).json({ error: 'Failed to fetch featured products' });
+    
+    // Check if it's a table not found error
+    if (error.code === 'P2021' || error.message.includes('does not exist')) {
+      // Return empty array if table doesn't exist
+      res.json([]);
+    } else {
+      res.status(500).json({ 
+        error: 'Failed to fetch featured products',
+        details: error.message 
+      });
+    }
   }
 });
 
 // Categories API
 app.get('/api/categories', async (req, res) => {
   try {
+    // First check if categories table exists
     const categories = await prisma.category.findMany({
       where: { isActive: true },
       include: {
@@ -107,10 +158,22 @@ app.get('/api/categories', async (req, res) => {
       },
       orderBy: { name: 'asc' }
     });
-    res.json(categories);
+    
+    // If no categories found, return empty array instead of error
+    res.json(categories || []);
   } catch (error) {
     console.error('Categories fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch categories' });
+    
+    // Check if it's a table not found error
+    if (error.code === 'P2021' || error.message.includes('does not exist')) {
+      // Return empty array if table doesn't exist
+      res.json([]);
+    } else {
+      res.status(500).json({ 
+        error: 'Failed to fetch categories',
+        details: error.message 
+      });
+    }
   }
 });
 
@@ -140,15 +203,31 @@ app.get('/api/vendors', async (req, res) => {
     ]);
     
     res.json({
-      data: vendors,
-      count: totalCount,
+      data: vendors || [],
+      count: totalCount || 0,
       page: page,
       limit: limit,
-      totalPages: Math.ceil(totalCount / limit)
+      totalPages: Math.ceil((totalCount || 0) / limit)
     });
   } catch (error) {
     console.error('Vendors fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch vendors' });
+    
+    // Check if it's a table not found error
+    if (error.code === 'P2021' || error.message.includes('does not exist')) {
+      // Return empty data if table doesn't exist
+      res.json({
+        data: [],
+        count: 0,
+        page: page,
+        limit: limit,
+        totalPages: 0
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Failed to fetch vendors',
+        details: error.message 
+      });
+    }
   }
 });
 
