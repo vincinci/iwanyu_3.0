@@ -369,6 +369,28 @@ app.get('/api/auth/me', async (req, res) => {
   }
 });
 
+// Debug endpoint to check environment variables
+app.get('/api/debug-env', async (req, res) => {
+  try {
+    // Don't expose full DATABASE_URL for security, just show if it exists and format
+    const dbUrl = process.env.DATABASE_URL;
+    
+    res.json({
+      hasDbUrl: !!dbUrl,
+      dbUrlLength: dbUrl ? dbUrl.length : 0,
+      startsWithPostgres: dbUrl ? dbUrl.startsWith('postgresql://') : false,
+      hasSSLMode: dbUrl ? dbUrl.includes('sslmode=require') : false,
+      nodeEnv: process.env.NODE_ENV,
+      port: process.env.PORT,
+      // Show first 50 chars (safe part) and last 20 chars
+      dbUrlPreview: dbUrl ? `${dbUrl.substring(0, 50)}...${dbUrl.substring(dbUrl.length - 20)}` : null
+    });
+  } catch (error) {
+    console.error('Debug env error:', error);
+    res.status(500).json({ error: 'Debug failed' });
+  }
+});
+
 // Cart API endpoints will be implemented later
 
 // Start server
