@@ -63,7 +63,7 @@ async function cleanDatabase() {
     });
 
     // Delete sample users (keep admin)
-    console.log('�️ Deleting sample users...');
+    console.log('🗑️ Deleting sample users...');
     await prisma.user.deleteMany({
       where: {
         email: {
@@ -121,100 +121,5 @@ async function initializeCleanDatabase() {
 initializeCleanDatabase()
   .catch((error) => {
     console.error('Fatal error during initialization:', error);
-    process.exit(1);
-  });
-        email: 'vendor@iwanyu.com',
-        name: 'Sample Vendor',
-        role: 'VENDOR',
-        emailVerified: new Date()
-      }
-    });
-
-    // Create sample vendor
-    const sampleVendor = await prisma.vendor.upsert({
-      where: { userId: sampleUser.id },
-      update: {},
-      create: {
-        userId: sampleUser.id,
-        businessName: 'Iwanyu Electronics',
-        businessDescription: 'Leading electronics retailer in Rwanda',
-        businessType: 'RETAIL',
-        status: 'APPROVED',
-        phone: '+250788123456',
-        address: 'Kigali, Rwanda',
-        businessLicense: 'BL123456',
-        taxId: 'TAX123456'
-      }
-    });
-
-    // Create sample products
-    const electronics = await prisma.category.findUnique({
-      where: { slug: 'electronics' }
-    });
-
-    const sampleProducts = [
-      {
-        name: 'iPhone 15 Pro',
-        slug: 'iphone-15-pro',
-        description: 'Latest iPhone with advanced features',
-        price: 999.99,
-        comparePrice: 1099.99,
-        sku: 'IP15PRO001',
-        inventory: 50,
-        status: 'ACTIVE',
-        categoryId: electronics.id,
-        vendorId: sampleVendor.id,
-        images: ['https://cdn.shopify.com/s/files/1/0057/8938/4802/files/iPhone_15_Pro_Natural_Titanium_PDP_Image_Position-1__en-US.jpg']
-      },
-      {
-        name: 'Samsung Galaxy S24',
-        slug: 'samsung-galaxy-s24',
-        description: 'Premium Android smartphone',
-        price: 849.99,
-        comparePrice: 949.99,
-        sku: 'SGS24001',
-        inventory: 30,
-        status: 'ACTIVE',
-        categoryId: electronics.id,
-        vendorId: sampleVendor.id,
-        images: ['https://cdn.shopify.com/s/files/1/0057/8938/4802/files/Galaxy_S24_Violet_PDP_Image_Position-1__en-US.jpg']
-      },
-      {
-        name: 'MacBook Pro 14"',
-        slug: 'macbook-pro-14',
-        description: 'Professional laptop for creators',
-        price: 1999.99,
-        comparePrice: 2199.99,
-        sku: 'MBP14001',
-        inventory: 20,
-        status: 'ACTIVE',
-        categoryId: electronics.id,
-        vendorId: sampleVendor.id,
-        images: ['https://cdn.shopify.com/s/files/1/0057/8938/4802/files/MacBook_Pro_14_Space_Gray_PDP_Image_Position-1__en-US.jpg']
-      }
-    ];
-
-    console.log('📱 Creating products...');
-    for (const product of sampleProducts) {
-      await prisma.product.upsert({
-        where: { slug: product.slug },
-        update: product,
-        create: product
-      });
-    }
-
-    console.log('✅ Database seeding completed successfully!');
-  } catch (error) {
-    console.error('❌ Database seeding failed:', error);
-    throw error;
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-// Run the seed function
-seedDatabase()
-  .catch((error) => {
-    console.error('Fatal error during seeding:', error);
     process.exit(1);
   });
