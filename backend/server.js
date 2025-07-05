@@ -74,6 +74,39 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
+// Simple connection test endpoint
+app.get('/api/simple-db-test', async (req, res) => {
+  try {
+    console.log('Testing simple database connection...');
+    
+    // Try basic Prisma connection
+    await prisma.$connect();
+    console.log('✅ Prisma connect successful');
+    
+    // Try a simple query
+    const result = await prisma.$queryRaw`SELECT 1 as test`;
+    console.log('✅ Simple query successful:', result);
+    
+    res.json({ 
+      status: 'success', 
+      message: 'Database connection working',
+      testResult: result
+    });
+    
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    res.status(500).json({ 
+      status: 'error',
+      message: 'Database connection failed',
+      error: error.message,
+      errorCode: error.code || 'UNKNOWN',
+      details: error.toString()
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
 // Products API
 // Products API
 app.get('/api/products', async (req, res) => {
