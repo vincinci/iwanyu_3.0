@@ -23,42 +23,17 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    // Check if we're in test mode
-    const isTestMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (isTestMode) {
-      // Test mode: simple email/password check
-      if (formData.email && formData.password) {
-        // Create a mock user
-        const mockUser = {
-          id: '1',
-          email: formData.email,
-          user_metadata: {
-            role: formData.email.includes('vendor') ? 'VENDOR' : 'CUSTOMER',
-            name: formData.email.split('@')[0]
-          }
-        };
-        
-        // Save to localStorage
-        localStorage.setItem('test-user', JSON.stringify(mockUser));
-        
-        // Reload the page to trigger auth context update
-        window.location.href = '/';
-        return;
-      } else {
-        setError('Please enter email and password');
-        setLoading(false);
-        return;
-      }
+    if (!formData.email || !formData.password) {
+      setError('Please enter both email and password');
+      setLoading(false);
+      return;
     }
 
-    // Authentication using AuthContext
     try {
       await signIn(formData.email, formData.password);
       router.push('/');
-      router.refresh();
     } catch (error) {
-      setError('Invalid email or password');
+      setError(error instanceof Error ? error.message : 'Login failed');
       console.error('Login error:', error);
     } finally {
       setLoading(false);

@@ -37,19 +37,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Mock sign in - in a real app, this would call your backend API
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
-        role: 'customer'
+      // Call the backend API for authentication
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Authentication failed');
+      }
+
+      const data = await response.json();
+      const user: User = {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        role: data.user.role.toLowerCase() as 'customer' | 'vendor' | 'admin'
       };
-      setUser(mockUser);
-      localStorage.setItem('iwanyu_user', JSON.stringify(mockUser));
-      console.log('Mock login with:', email, password);
+
+      setUser(user);
+      localStorage.setItem('iwanyu_user', JSON.stringify(user));
+      
+      // Store the JWT token if provided
+      if (data.token) {
+        localStorage.setItem('iwanyu_token', data.token);
+      }
+      
     } catch (error) {
       console.error('Sign in failed:', error);
-      throw new Error('Sign in failed');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -58,19 +78,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, name: string) => {
     setLoading(true);
     try {
-      // Mock sign up - in a real app, this would call your backend API
-      const mockUser: User = {
-        id: '2',
-        email,
-        name,
-        role: 'customer'
+      // Call the backend API for registration
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
+
+      const data = await response.json();
+      const user: User = {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        role: data.user.role.toLowerCase() as 'customer' | 'vendor' | 'admin'
       };
-      setUser(mockUser);
-      localStorage.setItem('iwanyu_user', JSON.stringify(mockUser));
-      console.log('Mock signup with:', email, password, name);
+
+      setUser(user);
+      localStorage.setItem('iwanyu_user', JSON.stringify(user));
+      
+      // Store the JWT token if provided
+      if (data.token) {
+        localStorage.setItem('iwanyu_token', data.token);
+      }
+      
     } catch (error) {
       console.error('Sign up failed:', error);
-      throw new Error('Sign up failed');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -79,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = () => {
     setUser(null);
     localStorage.removeItem('iwanyu_user');
+    localStorage.removeItem('iwanyu_token');
   };
 
   const isVendor = user?.role === 'vendor';
