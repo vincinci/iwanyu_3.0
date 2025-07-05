@@ -126,6 +126,60 @@ If you encounter issues:
 3. Test API endpoints individually
 4. Check browser console for errors
 
+## 🔧 TROUBLESHOOTING
+
+### ❌ Common Deployment Issues
+
+**1. React Version Conflict (FIXED)**
+```
+Error: flutterwave-react-v3 requires React 15-18, but found React 19
+```
+✅ **Solution Applied**: Downgraded React to v18 for compatibility
+
+**2. NPM Dependency Conflicts**
+```
+Error: ERESOLVE could not resolve dependencies
+```
+✅ **Solution Applied**: Added `.npmrc` with `legacy-peer-deps=true`
+
+**3. Vercel Build Command**
+```
+Error: npm install failed with peer dependency conflicts
+```
+✅ **Solution Applied**: Updated vercel.json to use `--legacy-peer-deps` flag
+
+**4. Other Common Issues:**
+- **CORS Errors**: Backend configured for your frontend URL
+- **Environment Variables**: All required variables documented
+- **Database Connection**: Supabase URL configured
+- **Image Loading**: Next.js image domains configured
+
+### 🔄 **If Build Still Fails:**
+
+1. **Check Vercel Build Logs**:
+   - Go to Vercel dashboard
+   - Click on your project
+   - Check "Deployments" tab for error details
+
+2. **Verify Environment Variables**:
+   - All variables from `VERCEL_ENV_VARS.txt` are set
+   - No typos in variable names
+   - No trailing spaces in values
+
+3. **Test Locally**:
+   ```bash
+   cd frontend
+   npm install --legacy-peer-deps
+   npm run build
+   ```
+
+4. **Force Redeploy**:
+   - Go to Vercel dashboard
+   - Click "Redeploy" on latest deployment
+   - Or push a new commit to trigger deployment
+
+---
+
 **Your Iwanyu platform is ready to go live! 🎉**
 
 ---
