@@ -75,6 +75,7 @@ app.get('/api/db-test', async (req, res) => {
 });
 
 // Products API
+// Products API
 app.get('/api/products', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -100,15 +101,31 @@ app.get('/api/products', async (req, res) => {
     ]);
     
     res.json({
-      data: products,
-      count: totalCount,
+      data: products || [],
+      count: totalCount || 0,
       page: page,
       limit: limit,
-      totalPages: Math.ceil(totalCount / limit)
+      totalPages: Math.ceil((totalCount || 0) / limit)
     });
   } catch (error) {
     console.error('Products fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    
+    // Check if it's a table not found error
+    if (error.code === 'P2021' || error.message.includes('does not exist')) {
+      // Return empty data if table doesn't exist
+      res.json({
+        data: [],
+        count: 0,
+        page: page,
+        limit: limit,
+        totalPages: 0
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Failed to fetch products',
+        details: error.message 
+      });
+    }
   }
 });
 
