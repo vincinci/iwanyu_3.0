@@ -11,9 +11,10 @@ const PORT = process.env.PORT || 3001;
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [
-        'https://iwanyu-platform.vercel.app',
-        'https://iwanyu-platform-git-main.vercel.app',
-        /^https:\/\/iwanyu-platform-.*\.vercel\.app$/
+        'https://iwanyu-3-0.vercel.app',
+        'https://iwanyu-3-0-git-main.vercel.app',
+        /^https:\/\/iwanyu-3-0-.*\.vercel\.app$/,
+        process.env.FRONTEND_URL
       ]
     : [
         'http://localhost:3000',
